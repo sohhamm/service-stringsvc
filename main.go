@@ -2,11 +2,14 @@ package main
 
 import (
 	"context"
+	"encoding/json"
 	"errors"
 	"log"
+	"net/http"
 	"strings"
 
 	"github.com/go-kit/kit/endpoint"
+	httpTransport "github.com/go-kit/kit/transport/http"
 )
 
 // * Service layer
@@ -55,7 +58,7 @@ type countResponse struct {
 
 // * Adapters
 
-func makeUpperCaseEndpoint(svc StringService) endpoint.Endpoint {
+func makeUppercaseEndpoint(svc StringService) endpoint.Endpoint {
 
 	return func(_ context.Context, request interface{}) (interface{}, error) {
 		req := request.(uppercaseRequest)
@@ -81,5 +84,41 @@ func makeCountEndpoint(svc StringService) endpoint.Endpoint {
 }
 
 func main() {
-	log.Println("service stringsvc")
+	svc := stringService{}
+
+	uppercaseHandler := httpTransport.NewServer(makeUppercaseEndpoint(svc), decodeUppercaseRequest, encodeResponse)
+
+	countHandler := httpTransport.NewServer(makeCountEndpoint(svc), decodeCountRequest, encodeResponse)
+
+	http.Handle("/uppercase", uppercaseHandler)
+	http.Handle("/count", countHandler)
+
+	log.Fatal(http.ListenAndServe(":9000", nil))
+
+}
+
+func decodeUppercaseRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var request uppercaseRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, err
+	}
+
+	return request, nil
+
+}
+
+func decodeCountRequest(_ context.Context, r *http.Request) (interface{}, error) {
+	var request countRequest
+
+	if err := json.NewDecoder(r.Body).Decode(&request); err != nil {
+		return nil, err
+	}
+
+	return request, nil
+
+}
+
+func encodeResponse(_ context.Context, w http.ResponseWriter, response interface{}) error {
+	return json.NewEncoder(w).Encode(response)
 }
