@@ -4,6 +4,7 @@ import (
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"log"
 	"net/http"
 	"strings"
@@ -92,6 +93,8 @@ func main() {
 
 	http.Handle("/uppercase", uppercaseHandler)
 	http.Handle("/count", countHandler)
+
+	fmt.Println("server starter..... 🔥")
 
 	log.Fatal(http.ListenAndServe(":9000", nil))
 
