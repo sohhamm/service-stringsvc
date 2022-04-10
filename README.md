@@ -1,1 +1,3 @@
-# Go kit microservice for string svc
+# String Service
+
+## A simple string service using go kit

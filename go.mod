@@ -1,4 +1,4 @@
-module github.com/sohhamm/service-stringsvc
+module github.com/sohhamm/string-svc
 
 go 1.18
 
